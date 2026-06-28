@@ -15,9 +15,17 @@ COLUMNS = [
 ]
 
 def parse_to_dataframe(data):
+
     df = pd.DataFrame(data)
+
+    missing = [col for col in COLUMNS if col not in df.columns]
+
+    if missing:
+        logger.error(f"Missing columns: {missing}")
+        raise KeyError(f"Missing columns: {missing}")
+
     df = df[COLUMNS]
-    logger.info(
-    f"DataFrame Created : {df.shape}"
-)
+
+    logger.info(f"DataFrame Created : {df.shape}")
+
     return df
