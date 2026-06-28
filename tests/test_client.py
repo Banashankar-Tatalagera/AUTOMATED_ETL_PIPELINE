@@ -1,11 +1,11 @@
 from app.extract.client import fetch_data
 
-response = fetch_data()
+try:
+    response = fetch_data()
 
-print("Type :", type(response))
+    print(f"Status Code : {response.status_code}")
+    print(f"Reason      : {response.reason}")
+    print(f"Content-Type: {response.headers['Content-Type']}")
 
-print("Status Code :", response.status_code)
-
-print("Reason :", response.reason)
-
-print("Content Type :", response.headers["Content-Type"])
+except Exception as e:
+    print(f"Error: {e}")

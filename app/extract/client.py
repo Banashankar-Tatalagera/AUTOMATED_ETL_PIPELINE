@@ -25,12 +25,22 @@ def fetch_data():
 
     url = build_url()
 
-    response = session.get(
-        url,
-        timeout=10
-    )
+    try:
 
-    logger.info(f"Status Code : {response.status_code}")
+        response = session.get(
+            url,
+            timeout=10
+        )
 
-    return response
+        logger.info(f"Status Code : {response.status_code}")
+
+        response.raise_for_status()
+
+        return response
+
+    except requests.exceptions.RequestException as e:
+
+        logger.error(f"API Request Failed : {e}")
+
+        raise
 
