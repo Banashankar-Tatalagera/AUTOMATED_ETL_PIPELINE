@@ -1,5 +1,10 @@
-# test_pipeline.py
-from app.logger import logger
+from app.extract.pipeline import run_extraction_pipeline
 
-logger.info("Pipeline Started")
-print("Successfully logged! Check logs/pipeline.log")
+df = run_extraction_pipeline()
+
+print(df.head())
+
+print()
+
+print(df.shape)
+
