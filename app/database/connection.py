@@ -17,7 +17,5 @@ SessionLocal = sessionmaker(
 
 
 def get_session():
-
-    logger.info("Creating database session.")
-
+    
     return SessionLocal()
