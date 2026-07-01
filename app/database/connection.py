@@ -1,8 +1,10 @@
 from sqlalchemy import create_engine
+from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 from app.config import DATABASE_URL
-from app.logger import logger
+
+Base = declarative_base()
 
 engine = create_engine(
     DATABASE_URL,
@@ -15,7 +17,5 @@ SessionLocal = sessionmaker(
     autocommit=False
 )
 
-
 def get_session():
-    
     return SessionLocal()
