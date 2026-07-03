@@ -2,11 +2,21 @@ import streamlit as st
 import pandas as pd
 
 from api_client import get_all_coins
+
+from sidebar import sidebar_filters
+from metrics import show_metrics
 from charts import (
     market_cap_chart,
     trend_chart,
     category_chart
 )
+from details import show_details
+from table import show_table
+
+
+# ==========================================
+# Page Configuration
+# ==========================================
 
 st.set_page_config(
     page_title="Crypto ETL Dashboard",
@@ -14,91 +24,99 @@ st.set_page_config(
     layout="wide"
 )
 
-# ==============================
+st.title("📈 Crypto ETL Dashboard")
+
+
+# ==========================================
 # Load Data
-# ==============================
+# ==========================================
 
 coins = get_all_coins()
 df = pd.DataFrame(coins)
 
-# ==============================
-# Dashboard Title
-# ==============================
 
-st.title("📈 Crypto ETL Dashboard")
+# ==========================================
+# Sidebar
+# ==========================================
 
-# ==============================
-# KPI Calculations
-# ==============================
+search, trend, category, refresh = sidebar_filters()
 
-total = len(df)
+if refresh:
+    st.rerun()
 
-bullish = len(df[df["price_trend"] == "Bullish"])
 
-bearish = len(df[df["price_trend"] == "Bearish"])
+# ==========================================
+# Apply Filters
+# ==========================================
 
-large_cap = len(df[df["market_cap_category"] == "Large Cap"])
-
-# ==============================
-# KPI Cards
-# ==============================
-
-col1, col2, col3, col4 = st.columns(4)
-
-col1.metric("Total Coins", total)
-col2.metric("Bullish", bullish)
-col3.metric("Bearish", bearish)
-col4.metric("Large Cap", large_cap)
-
-st.divider()
-
-# ==============================
-# Search
-# ==============================
-
-search = st.text_input(
-    "🔍 Search Coin",
-    placeholder="Bitcoin, Ethereum..."
-)
+filtered_df = df.copy()
 
 if search:
-    df = df[
-        df["name"].str.contains(search, case=False)
+    filtered_df = filtered_df[
+        filtered_df["name"].str.contains(
+            search,
+            case=False
+        )
     ]
 
-# ==============================
+if trend != "All":
+    filtered_df = filtered_df[
+        filtered_df["price_trend"] == trend
+    ]
+
+if category != "All":
+    filtered_df = filtered_df[
+        filtered_df["market_cap_category"] == category
+    ]
+
+
+# ==========================================
+# Metrics
+# ==========================================
+
+show_metrics(filtered_df)
+
+
+# ==========================================
 # Charts
-# ==============================
+# ==========================================
 
 left, right = st.columns(2)
 
 with left:
+
     st.plotly_chart(
-        market_cap_chart(df),
-        use_container_width=True
+        market_cap_chart(filtered_df),
+        width="stretch",
+        key="market_cap_chart"
     )
 
 with right:
+
     st.plotly_chart(
-        trend_chart(df),
-        use_container_width=True
+        trend_chart(filtered_df),
+        width="stretch",
+        key="trend_chart"
     )
 
 st.plotly_chart(
-    category_chart(df),
-    use_container_width=True
+    category_chart(filtered_df),
+    width="stretch",
+    key="category_chart"
 )
 
 st.divider()
 
-# ==============================
-# Table
-# ==============================
 
-st.subheader("Coin Data")
+# ==========================================
+# Coin Details
+# ==========================================
 
-st.dataframe(
-    df,
-    use_container_width=True,
-    hide_index=True
-)
+show_details(filtered_df)
+
+
+# ==========================================
+# Coin Table
+# ==========================================
+
+show_table(filtered_df)
