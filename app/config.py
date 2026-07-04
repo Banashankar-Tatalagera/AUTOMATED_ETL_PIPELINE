@@ -23,6 +23,8 @@ DATABASE_URL = (
 # -----------------------------
 API_BASE_URL = os.getenv("API_BASE_URL")
 VS_CURRENCY = os.getenv("VS_CURRENCY")
-PER_PAGE = int(os.getenv("PER_PAGE"))
-PAGE = int(os.getenv("PAGE"))
+PER_PAGE = int(os.getenv("PER_PAGE", "100"))
+PAGE = int(os.getenv("PAGE", "1"))
+
+VS_CURRENCY = os.getenv("VS_CURRENCY", "usd")
 
