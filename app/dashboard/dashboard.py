@@ -8,7 +8,7 @@ from metrics import show_metrics
 from charts import (
     market_cap_chart,
     trend_chart,
-    category_chart
+    category_chart,
 )
 from details import show_details
 from table import show_table
@@ -21,7 +21,7 @@ from table import show_table
 st.set_page_config(
     page_title="Crypto ETL Dashboard",
     page_icon="📈",
-    layout="wide"
+    layout="wide",
 )
 
 st.title("📈 Crypto ETL Dashboard")
@@ -31,8 +31,23 @@ st.title("📈 Crypto ETL Dashboard")
 # Load Data
 # ==========================================
 
-coins = get_all_coins()
-df = pd.DataFrame(coins)
+@st.cache_data(ttl=60)
+def load_data():
+    coins = get_all_coins()
+    return pd.DataFrame(coins)
+
+
+try:
+    df = load_data()
+
+except Exception as e:
+    st.error(f"Unable to fetch data from the API.\n\n{e}")
+    st.stop()
+
+
+if df.empty:
+    st.warning("No cryptocurrency data found.")
+    st.stop()
 
 
 # ==========================================
@@ -42,6 +57,7 @@ df = pd.DataFrame(coins)
 search, trend, category, refresh = sidebar_filters()
 
 if refresh:
+    st.cache_data.clear()
     st.rerun()
 
 
@@ -55,7 +71,8 @@ if search:
     filtered_df = filtered_df[
         filtered_df["name"].str.contains(
             search,
-            case=False
+            case=False,
+            na=False
         )
     ]
 
@@ -70,11 +87,18 @@ if category != "All":
     ]
 
 
+if filtered_df.empty:
+    st.warning("No coins match the selected filters.")
+    st.stop()
+
+
 # ==========================================
 # Metrics
 # ==========================================
 
 show_metrics(filtered_df)
+
+st.divider()
 
 
 # ==========================================
@@ -87,22 +111,22 @@ with left:
 
     st.plotly_chart(
         market_cap_chart(filtered_df),
-        width="stretch",
-        key="market_cap_chart"
+        use_container_width=True,
+        key="market_cap_chart",
     )
 
 with right:
 
     st.plotly_chart(
         trend_chart(filtered_df),
-        width="stretch",
-        key="trend_chart"
+        use_container_width=True,
+        key="trend_chart",
     )
 
 st.plotly_chart(
     category_chart(filtered_df),
-    width="stretch",
-    key="category_chart"
+    use_container_width=True,
+    key="category_chart",
 )
 
 st.divider()
@@ -114,9 +138,20 @@ st.divider()
 
 show_details(filtered_df)
 
+st.divider()
+
 
 # ==========================================
 # Coin Table
 # ==========================================
 
 show_table(filtered_df)
+
+
+# ==========================================
+# Footer
+# ==========================================
+
+st.caption(
+    "Crypto ETL Dashboard • Built with FastAPI, PostgreSQL, Streamlit, Plotly & Docker"
+)
