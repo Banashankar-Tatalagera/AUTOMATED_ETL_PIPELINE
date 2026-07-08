@@ -1,0 +1,51 @@
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: crypto_postgres
+
+    restart: always
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: etl_dashboard
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build: .
+
+    container_name: crypto_api
+
+    depends_on:
+      - postgres
+
+    env_file:
+      - .env
+
+    ports:
+      - "7000:8000"
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.streamlit
+
+    container_name: crypto_dashboard
+
+    depends_on:
+      - api
+
+    env_file:
+      - .env
+
+    ports:
+      - "8501:8501"
+
+volumes:
+  postgres_data:
