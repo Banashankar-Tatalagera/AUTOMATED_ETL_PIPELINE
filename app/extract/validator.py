@@ -32,8 +32,8 @@ def validate_response(response):
     data = response.json()
 
     if not data:
-        logger.error("API returned empty data.")
-        raise ValueError("Empty response.")
+        logger.warning("API returned empty data.")
+        return data
 
     for field in REQUIRED_FIELDS:
 
