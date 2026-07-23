@@ -16,6 +16,10 @@ COLUMNS = [
 
 def parse_to_dataframe(data):
 
+    if not data:
+        logger.warning("No rows returned from API; creating an empty DataFrame.")
+        return pd.DataFrame(columns=COLUMNS)
+
     df = pd.DataFrame(data)
 
     missing = [col for col in COLUMNS if col not in df.columns]
